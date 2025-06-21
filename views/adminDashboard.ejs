@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Lista de Usuários</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <style>
+        :root {
+            --primary-color: #03BFCB;
+            --secondary-color: #FEBB0B;
+            --dark-bg: #231E39;
+            --light-bg: #28223F;
+            --text-color: #B3B8CD;
+            --card-border: #2d2747;
+            --danger-color: #dc3545;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif; /* Modern font */
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        .header-bar {
+            background-color: var(--dark-bg);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        .menu-toggle {
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--primary-color);
+            margin-right: 20px;
+        }
+        .header-bar h1 {
+            font-size: 1.5rem;
+            color: var(--secondary-color);
+        }
+        .menu-container {
+            position: fixed;
+            top: 0;
+            left: -280px; /* Hidden by default */
+            height: 100%;
+            width: 250px;
+            background-color: var(--dark-bg);
+            padding: 20px;
+            padding-top: 70px; /* Below header */
+            transition: left 0.3s ease-in-out;
+            z-index: 999;
+            box-shadow: 3px 0 15px rgba(0,0,0,0.3);
+        }
+        .menu-container.show-menu { left: 0; }
+        .menu-container h3 { color: var(--secondary-color); margin-bottom: 15px; }
+        .menu-container hr { border-color: var(--card-border); margin: 15px 0; }
+        .menu-container a { /* Changed buttons to links for semantics */
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px 15px;
+            font-size: 1rem;
+            background-color: var(--primary-color);
+            color: var(--dark-bg);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .menu-container a:hover { background-color: var(--secondary-color); }
+        .close-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--primary-color);
+        }
+        .main-content {
+            padding: 20px;
+            padding-top: 100px; /* Space for fixed header */
+            margin-left: 0; /* Adjust if sidebar is persistent */
+            transition: margin-left 0.3s ease-in-out;
+        }
+        /* .main-content.sidebar-active { margin-left: 250px; } */ /* Uncomment if sidebar pushes content */
+
+        .search-form {
+            margin-bottom: 30px;
+            display: flex;
+            gap: 10px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .search-form input[type="text"] {
+            flex-grow: 1;
+            padding: 12px;
+            font-size: 1rem;
+            border: 1px solid var(--card-border);
+            border-radius: 5px;
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+        }
+        .search-form input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(3, 191, 203, 0.25);
+        }
+        .search-form button {
+            padding: 12px 20px;
+            font-size: 1rem;
+            background-color: var(--primary-color);
+            color: var(--dark-bg);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .search-form button:hover { background-color: var(--secondary-color); }
+        .search-form button i { margin-right: 5px; }
+
+        .users-list-title {
+            text-align: center;
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+        .user-card {
+            background-color: var(--dark-bg);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .user-card span { display: block; margin-bottom: 8px; }
+        .user-card span strong { color: var(--primary-color); }
+        .user-card .actions { display: flex; gap: 10px; margin-top: 15px; }
+        .user-card .actions a, .user-card .actions button {
+            flex-grow: 1;
+            padding: 10px;
+            font-size: 0.9rem;
+            border-radius: 5px;
+            text-decoration: none;
+            text-align: center;
+            font-weight: bold;
+            transition: background-color 0.2s;
+            cursor: pointer;
+            border: none;
+        }
+        .user-card .actions a { /* Edit button */
+            background-color: var(--primary-color);
+            color: var(--dark-bg);
+        }
+        .user-card .actions a:hover { background-color: var(--secondary-color); }
+        .user-card .actions button { /* Delete button */
+            background-color: var(--danger-color);
+            color: white;
+        }
+        .user-card .actions button:hover { background-color: #c82333; }
+        .user-card .actions i { margin-right: 5px; }
+    </style>
+</head>
+<body>
+    <div class="header-bar">
+        <span class="menu-toggle" onclick="toggleMenu()"><i class="fas fa-bars"></i></span>
+        <h1>Admin Dashboard</h1>
+    </div>
+
+    <div class="menu-container" id="menu">
+        <span class="close-button" onclick="toggleMenu()"><i class="fas fa-times"></i></span>
+        <h3>Menu</h3>
+        <hr>
+        <a href="/admin"><i class="fas fa-users mr-2"></i> All Users</a>
+        <a href="/admin/settings"><i class="fas fa-cog mr-2"></i> Settings</a>
+        <a href="/logout"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
+        <!-- Add more admin links here -->
+    </div>
+    
+    <div class="main-content" id="mainContent">
+        <form action="/search" method="GET" class="search-form">
+            <input type="text" name="search" placeholder="Pesquisar usuário por nome, email...">
+            <button type="submit"><i class="fas fa-search"></i> Pesquisar</button>
+        </form>
+
+        <h2 class="users-list-title">Lista de Usuários</h2>
+        
+        <% if (users && users.length > 0) { %>
+            <% users.forEach((user) => { %>
+                <div class="user-card">
+                    <span><strong>Username:</strong> <%= user.username %></span>
+                    <span><strong>Email:</strong> <%= user.email || 'N/A' %></span>
+                    <span><strong>Senha (hash):</strong> <%= user.password.substring(0, 15) %>...</span>
+                    <span><strong>Chave API:</strong> <%= user.key %></span>
+                    <span><strong>Saldo:</strong> <%= user.saldo %></span>
+                    <span><strong>Admin:</strong> <%= user.isAdm ? 'Sim' : 'Não' %></span>
+                    <span><strong>Premium:</strong> <%= user.isPremium ? 'Sim' : 'Não' %></span>
+                    <div class="actions">
+                        <a href="/editar/<%= user.username %>"><i class="fas fa-edit"></i> Editar</a>
+                        <button onclick="confirmDelete('<%= user.username %>')"><i class="fas fa-trash-alt"></i> Deletar</button>
+                    </div>
+                </div>
+            <% }) %>
+        <% } else { %>
+            <p style="text-align: center;">Nenhum usuário encontrado.</p>
+        <% } %>
+    </div>
+
+    <script>
+        function confirmDelete(username) {
+            if (confirm('Tem certeza que deseja deletar o usuário "' + username + '"? Esta ação é irreversível.')) {
+                window.location.href = '/deletar/' + username;
+            }
+        }
+
+        function toggleMenu() {
+            const menu = document.getElementById('menu');
+            // const mainContent = document.getElementById('mainContent'); // Uncomment if sidebar pushes content
+            menu.classList.toggle('show-menu');
+            // mainContent.classList.toggle('sidebar-active'); // Uncomment if sidebar pushes content
+        }
+    </script>
+</body>
+</html>

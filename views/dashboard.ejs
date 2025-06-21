@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GeForce - APIs Dashboard</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta property="og:title" content="GeForce APIs Dashboard">
+  <meta property="og:description" content="Manage your API access and explore features.">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome-animation/0.0.8/font-awesome-animation.min.css" />
+  <link rel="apple-touch-icon" sizes="180x180" href="https://files.catbox.moe/xjb9yl.jpg">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta1/css/all.min.css" integrity="sha512-...." crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="https://ferdiz-afk.github.io/deskapp/vendors/styles/core.css">
+  <link rel="stylesheet" type="text/css" href="https://ferdiz-afk.github.io/deskapp/vendors/styles/icon-font.min.css">
+  <link rel="stylesheet" type="text/css" href="https://ferdiz-afk.github.io/deskapp/vendors/styles/style.css">
+
+  <style>
+    :root {
+        --primary-color: #03BFCB;
+        --secondary-color: #FEBB0B;
+        --dark-bg: #1F1A36;
+        --card-bg: #231E39;
+        --text-color: #E0E7FF;
+        --text-muted-color: #A0A8C0;
+        --border-color: #2d2747;
+    }
+
+    body {
+      background: var(--dark-bg) url('<%= user.wallpaper %>') no-repeat center center fixed;
+      -webkit-background-size: cover; background-size: cover;
+      font-family: 'Inter', sans-serif; display: flex; flex-direction: column;
+      min-height: 100vh; margin: 0; color: var(--text-color);
+    }
+
+    .main-container { flex-grow: 1; }
+
+    .main-footer {
+      margin-top: auto; background-color: var(--card-bg); padding: 15px 20px;
+      text-align: center; font-size: 14px; color: var(--text-muted-color);
+      border-top: 1px solid var(--border-color);
+    }
+
+    .main-footer a { color: var(--primary-color); text-decoration: none; }
+
+    .main-footer a:hover { color: var(--secondary-color); }
+
+    .left-side-bar .sidebar-menu .nav-link i.fas,
+    .left-side-bar .sidebar-menu .dropdown-toggle i.fas {
+        color: white !important; font-size: 16px;
+        margin-right: 12px; width: 20px;
+        text-align: center;
+    }
+
+    .left-side-bar .sidebar-menu .nav-link span,
+    .left-side-bar .sidebar-menu .dropdown-toggle span {
+        color: white !important; font-size: 16px; font-weight: 500;
+    }
+
+    .left-side-bar .sidebar-menu ul li a:hover {
+        background-color: rgba(255, 255, 255, 0.1); border-left: 3px solid var(--primary-color); padding-left: 12px;
+    }
+
+    .card-box { background-color: var(--card-bg); color: var(--text-color); border: 1px solid var(--border-color); }
+
+    .card-box .h5, .card-box .h6 { color: var(--secondary-color); }
+
+    .card-box small.text-secondary { color: var(--text-muted-color) !important; }
+    
+    .welcome-modal { background-color: var(--dark-bg); color: var(--text-color); border: 1px solid var(--primary-color); }
+
+    .welcome-modal-close i { color: var(--secondary-color); }
+
+    .welcome-modal .btn-light { background-color: var(--primary-color); color: var(--dark-bg); border: none; }
+
+    .welcome-modal .btn-light:hover { background-color: var(--secondary-color); }
+
+    .welcome-modal .btn-success { background-color: var(--secondary-color); color: var(--dark-bg); border: none; }
+
+    .welcome-modal .btn-success:hover { background-color: var(--primary-color); }
+    
+    .welcome-modal-btn {
+        position: fixed; bottom: 20px; right: 20px;
+        background-color: var(--secondary-color); 
+        color: var(--dark-bg);
+        width: 60px; height: 60px; border-radius: 50%; border: none;
+        font-size: 1.8rem; box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        cursor: pointer; z-index: 1040;
+        display: flex; align-items: center; justify-content: center;
+    }
+
+    .welcome-modal-btn i.fa-heart {
+        animation: faa-pulse animated 2s infinite;
+        color: #dc3545 !important;
+    }
+
+    .ai-chat-popup {
+        position: fixed; bottom: 20px; left: 20px; width: 350px; max-height: 80vh;
+        background-color: var(--card-bg); border: 1px solid var(--border-color);
+        border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        z-index: 1050; display: none; flex-direction: column; overflow: hidden;
+    }
+
+    .ai-chat-popup-header {
+        background-color: var(--dark-bg); padding: 10px 15px; display: flex;
+        justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color);
+    }
+
+    .ai-chat-popup-header h5 { margin: 0; font-size: 1rem; color: var(--secondary-color); }
+
+    .ai-chat-popup-header .close-chat { background: none; border: none; color: var(--text-muted-color); font-size: 1.2rem; cursor: pointer; }
+
+    .ai-chat-popup-body { padding: 15px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; }
+
+    .ai-chat-messages { flex-grow: 1; margin-bottom: 10px; }
+
+    .ai-chat-messages .message {
+        padding: 8px 12px; border-radius: 15px; margin-bottom: 8px;
+        max-width: 80%; word-wrap: break-word; font-size: 0.9rem;
+    }
+
+    .ai-chat-messages .user-message { background-color: var(--primary-color); color: var(--dark-bg); margin-left: auto; border-bottom-right-radius: 5px;}
+
+    .ai-chat-messages .ai-message { background-color: var(--dark-bg); color: var(--text-color); margin-right: auto; border-bottom-left-radius: 5px;}
+
+    .ai-chat-popup-footer { padding: 10px 15px; border-top: 1px solid var(--border-color); display: flex; }
+
+    .ai-chat-popup-footer input {
+        flex-grow: 1; padding: 8px 12px; border: 1px solid var(--border-color);
+        border-radius: 20px; background-color: var(--dark-bg); color: var(--text-color); margin-right: 10px;
+    }
+
+    .ai-chat-popup-footer button {
+        background-color: var(--primary-color); color: var(--dark-bg); border: none;
+        padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: 500;
+    }
+
+    .ai-chat-toggle-btn {
+        position: fixed; bottom: 20px; left: 20px;
+        background-color: var(--primary-color); 
+        color: var(--dark-bg); 
+        width: 60px; height: 60px; border-radius: 50%; border: none;
+        font-size: 1.8rem; box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        cursor: pointer; z-index: 1040;
+        display: flex; align-items: center; justify-content: center;
+    }
+
+    .ai-chat-toggle-btn.open { display: none; }
+
+    .loading-dots span {
+        display: inline-block; width: 8px; height: 8px; margin: 0 2px;
+        background-color: var(--text-muted-color); border-radius: 50%;
+        animation: bounce 1.4s infinite ease-in-out both;
+    }
+
+    .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+
+    .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+    @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
+  </style>
+</head>
+
+<body>
+  <div class="header">
+    <div class="header-left"><div class="menu-icon dw dw-menu"></div></div>
+    <div class="header-right">
+      <div class="user-notification">
+        <div class="dropdown">
+          <a class="dropdown-toggle no-arrow" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="icon-copy dw dw-notification"></i><span class="badge notification-active"></span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><div class="notification-list mx-h-350 customscroll"><ul><li><a class="dropdown-item" href="#"><img src="https://files.catbox.moe/xjb9yl.jpg" alt="" /><div><h3>GeForce APIs</h3><p>Welcome to GeForce APIs! Explore & enjoy.</p></div></a></li></ul></div></li>
+          </ul>
+        </div>
+      </div>
+      <div class="user-info-dropdown">
+        <div class="dropdown">
+          <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="user-icon"><img src="<%= user.ft %>" alt="User Avatar" /></span>
+            <span class="user-name"><%= user.username %></span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end dropdown-menu-icon-list">
+            <li><a class="dropdown-item" href="/myprofile"><i class="fas fa-user-circle mr-2"></i> Profile</a></li>
+            <li><a class="dropdown-item" href="/pricing"><i class="fas fa-crown mr-2"></i> Premium</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt mr-2"></i> Log Out</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div class="left-side-bar">
+  <div class="brand-logo" style="padding: 10px; background-color: var(--dark-bg);">
+    <a href="/dashboard" style="text-decoration: none;">
+      <h1 style="font-size: 24px; font-weight: bold; color: var(--secondary-color);">
+        GeForce <span style="color: var(--primary-color);">APIs</span>
+      </h1>
+    </a>
+    <div class="close-sidebar" data-toggle="left-sidebar-close"><i class="fas fa-times" style="color: white;"></i></div>
+  </div>
+  <div class="menu-block customscroll mCustomScrollbar _mCS_3">
+    <div class="sidebar-menu icon-style-1 icon-list-style-1">
+      <ul id="accordion-menu">
+        <li style="padding: 0;"><a href="/dashboard" class="dropdown-toggle no-arrow nav-link"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
+        <li style="padding: 10px 15px;"><div style="color: var(--secondary-color); font-weight: bold; font-size: 14px; text-transform: uppercase; border-top: 1px solid var(--border-color); padding-top: 10px;">Main Menu</div></li>
+        <li style="padding: 0;"><a href="/downloader" class="nav-link"><i class="fas fa-download"></i><span>Downloader</span></a></li>
+        <li style="padding: 0;"><a href="/ai-features" class="nav-link"><i class="fas fa-brain"></i><span>AI Features</span></a></li>
+        <li style="padding: 0;"><a href="/islamic" class="nav-link"><i class="fas fa-moon-stars"></i><span>Islamic</span></a></li>
+        <li style="padding: 0;"><a href="/search-features" class="nav-link"><i class="fas fa-magnifying-glass"></i><span>Search & Stalk</span></a></li>
+        <li style="padding: 0;"><a href="/game-features" class="nav-link"><i class="fas fa-gamepad"></i><span>Game Utilities</span></a></li>
+        <li class="dropdown" style="padding: 0;">
+          <a href="javascript:;" class="dropdown-toggle" data-option="off"><i class="fas fa-headset"></i><span>Contact Support</span></a>
+          <ul class="submenu"><li><a href="https://wa.me/6287860644193" style="color: white; padding-left: 45px;"><i class="fab fa-whatsapp mr-2"></i>WHATSAPP</a></li></ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+   
+  <div class="pre-loader">
+    <div class="pre-loader-box">
+      <div class="loader-logo"><img src="https://i.ibb.co/DtFgv3g/giphy.webp" alt="Loading..."></div>
+      <div class="loader-progress" id="progress_div"><div class="bar" id="bar1"></div></div>
+      <div class="percent" id="percent1">0%</div>
+      <div class="loading-text"> Please wait... </div>
+    </div>
+  </div>
+
+<div class="main-container">
+  <div class="pd-ltr-20">
+    <div class="card-box pd-20 height-100-p mb-30">
+        <div class="row align-items-center">
+            <div class="col-md-4 text-center"><img src="/vendors/images/banner-img.png" alt="Welcome Banner" style="max-width: 100%; height: auto;"></div>
+            <div class="col-md-8">
+                <h4 class="font-20 weight-500 mb-10 text-capitalize" style="color: var(--secondary-color);">Welcome back, <div class="weight-600 font-30" style="color: var(--primary-color);"><%= user.username %>!</div></h4>
+                <p class="font-18" style="color: var(--text-muted-color);">Ready to explore GeForce APIs? Let's get started!</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row pb-10">
+      <div class="col-lg-8 offset-lg-2 col-md-12 mb-20"> 
+        <div class="card-box pd-20 shadow-sm">
+          <h5 class="h5 mb-3 text-center" style="color: var(--secondary-color);">
+            <i class="fas fa-search-dollar mr-2"></i>Check API Key Usage
+          </h5>
+          <div class="input-group mb-3">
+            <input type="text" id="apiKeyToCheck" class="form-control" placeholder="Enter API Key to check" style="background-color: var(--dark-bg); color: var(--text-color); border: 1px solid var(--border-color);">
+            <div class="input-group-append">
+              <button class="btn btn-primary" type="button" id="checkLimitBtn" style="background-color: var(--primary-color); border-color: var(--primary-color); color: var(--dark-bg);">
+                <i class="fas fa-check-circle mr-1"></i> Check Limit
+              </button>
+            </div>
+          </div>
+          <div id="limitCheckResultDisplay" style="color: var(--text-muted-color); font-size: 0.9rem; min-height: 70px; padding-top: 10px; border-top: 1px dashed var(--border-color); margin-top:15px;">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row pb-10">
+        <div class="col-md-6 mb-20">
+          <div class="card-box d-flex justify-content-between align-items-center p-3 shadow-sm">
+            <div>
+              <div class="h5 mb-0" style="color: var(--primary-color);">
+                <% if (user.isPremium || user.isAdm) { %> Unlimited <% } else { %><%= user.usageCount %> / <%= user.dailyLimit %><% } %>
+              </div><small class="text-secondary">API Requests Today</small>
+            </div>
+            <div class="bg-light rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;"><i class="fas fa-tachometer-alt fa-lg" style="color: var(--primary-color);"></i></div>
+          </div>
+        </div>
+        <div class="col-md-6 mb-20">
+          <div class="card-box d-flex justify-content-between align-items-center p-3 shadow-sm">
+            <div>
+              <div class="h5 mb-0">
+                <% if (user.isPremium) { %><span class="badge bg-warning text-dark"><i class="fas fa-crown mr-1"></i>Premium</span>
+                <% } else if (user.isAdm) { %><span class="badge bg-danger text-white"><i class="fas fa-user-shield mr-1"></i>Admin</span>
+                <% } else { %><span class="badge bg-info text-dark">Free User</span> <a href="/pricing" class="btn btn-xs btn-outline-warning ml-2 py-0 px-1" style="font-size: 0.7rem; vertical-align: middle;"><i class="fas fa-arrow-up"></i> Upgrade</a> 
+                <% } %>
+              </div><small class="text-secondary">Account Status</small>
+            </div>
+            <div class="bg-light rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+              <% if (user.isPremium) { %><i class="fas fa-crown fa-lg text-warning"></i>
+              <% } else if (user.isAdm) { %><i class="fas fa-user-shield fa-lg text-danger"></i>
+              <% } else { %><i class="fas fa-user fa-lg text-info"></i><% } %>
+            </div>
+          </div>
+        </div>
+    </div>
+    <div class="row pb-10">
+      <div class="col-md-6 mb-20">
+        <div class="card-box d-flex justify-content-between align-items-center p-3 shadow-sm">
+          <div>
+            <div class="h5 mb-0" style="color: var(--primary-color);"><%= typeof quantidade !== 'undefined' ? quantidade : 'N/A' %></div>
+            <small class="text-secondary">Registered Users</small>
+          </div>
+          <div class="bg-light rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;"><i class="fas fa-users fa-lg" style="color: var(--primary-color);"></i></div>
+        </div>
+      </div>
+      <div class="col-md-6 mb-20">
+        <div class="card-box d-flex justify-content-between align-items-center p-3 shadow-sm">
+          <div>
+            <div class="h5 mb-0" style="color: var(--primary-color); font-size: 0.9rem; word-break: break-all;"><%= user.key %></div>
+            <small class="text-secondary">API Key <button class="btn btn-xs btn-outline-light py-0 px-1 ml-1" style="font-size:0.7rem" onclick="copyApiKey('<%= user.key %>')"><i class="far fa-copy"></i></button></small>
+          </div>
+          <div class="bg-light rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;"><i class="fas fa-key fa-lg text-success"></i></div>
+        </div>
+      </div>
+      <div class="col-md-6 mb-20">
+        <div class="card-box d-flex justify-content-between align-items-center p-3 shadow-sm">
+          <div><div class="h6 mb-0" id="tanggal" style="color: var(--primary-color);">Loading...</div><small class="text-secondary">Date</small></div>
+          <div class="bg-light rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;"><i class="fas fa-calendar-alt fa-lg text-info"></i></div>
+        </div>
+      </div>
+      <div class="col-md-6 mb-20">
+        <div class="card-box d-flex justify-content-between align-items-center p-3 shadow-sm">
+          <div><div class="h6 mb-0" id="Clock" style="color: var(--primary-color);">00:00:00</div><small id="Ucapan" class="text-muted">Loading...</small></div>
+          <div class="bg-light rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;"><i class="fas fa-clock fa-lg text-warning"></i></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+  <div class="welcome-modal">
+    <button class="welcome-modal-close"><i class="fas fa-times"></i></button>
+    <iframe class="w-100 border-0" src="https://embed.lottiefiles.com/animation/31548"></iframe>
+    <div class="text-center">
+      <h3 class="h5 weight-500 text-center mb-2"><i class="fas fa-bullhorn mr-2" style="color: var(--secondary-color);"></i> Stay Connected!<span role="img" aria-label="gratitude">🪸</span></h3>
+       <p class="font-14">Follow our channel & try our <a href="#" id="openAiChatFromModal" style="color: var(--primary-color); font-weight: bold;">AI Assistant</a>!</p>
+    </div>
+    <div class="text-center mb-1"><div><a href="https://www.instagram.com/_hiaxel" target="_blank" class="btn btn-light btn-block btn-sm"><i class="fab fa-instagram mr-1"></i> My Channel</a></div></div>
+    <a href="https://whatsapp.com/channel/0029VbA6ZQp72WTpwhiTlo3W" target="_blank" class="btn btn-success btn-sm mb-0 mb-md-3 w-100"><i class="fab fa-whatsapp mr-1"></i> WhatsApp Channel</a>
+  </div>
+  <button class="welcome-modal-btn"><i class="fas fa-heart text-danger"></i></button>
+
+  <button class="ai-chat-toggle-btn" id="aiChatToggleButton"><i class="fas fa-comment-dots"></i></button>
+  <div class="ai-chat-popup" id="aiChatPopup">
+    <div class="ai-chat-popup-header">
+        <h5><i class="fas fa-robot mr-2"></i>GeForce AI</h5>
+        <button class="close-chat" id="closeAiChatPopup"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="ai-chat-popup-body"><div class="ai-chat-messages" id="aiChatMessages"><div class="message ai-message">Hello <%= user.username %>! How can I help?</div></div></div>
+    <div class="ai-chat-popup-footer">
+        <input type="text" id="aiChatInput" placeholder="Ask GeForce AI...">
+        <button id="sendAiChatMessage"><i class="fas fa-paper-plane"></i></button>
+    </div>
+  </div>
+  
+<footer class="main-footer">
+  <div class="footer-content">
+    <p>© 2024 - <%= new Date().getFullYear() + 1 %> <a href="/">GeForce APIs</a>. All Rights Reserved.</p>
+    <p>Powered by <i class="fas fa-bolt" style="color: var(--secondary-color);"></i> Your Creativity</p>
+  </div>
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
+
+<script src="https://ferdiz-afk.github.io/deskapp/vendors/scripts/core.js"></script>
+<script src="https://ferdiz-afk.github.io/deskapp/vendors/scripts/script.min.js"></script>
+<script src="https://ferdiz-afk.github.io/deskapp/vendors/scripts/process.js"></script>
+<script src="https://ferdiz-afk.github.io/deskapp/vendors/scripts/layout-settings.js"></script>
+<script src="https://ferdiz-afk.github.io/deskapp/vendors/scripts/dashboard.js"></script>
+<script>
+  function copyApiKey(k){navigator.clipboard.writeText(k).then(()=>alert('API Key copied!')).catch(()=>alert('Failed to copy API Key.'));}
+  function updateDateTime(){const n=new Date(),d=document.getElementById('tanggal'),c=document.getElementById('Clock'),u=document.getElementById('Ucapan');if(d)d.textContent=n.toLocaleDateString('id-ID',{weekday:'long',year:'numeric',month:'long',day:'numeric'});if(c)c.textContent=n.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',second:'2-digit'});if(u){let h=n.getHours(),g="Selamat Malam 🌃";if(h>=5&&h<12)g="Selamat Pagi 🌅";else if(h>=12&&h<15)g="Selamat Siang 🌇";else if(h>=15&&h<18)g="Selamat Sore 🌆";u.textContent=g;}}
+  updateDateTime(); setInterval(updateDateTime,1000);
+  $(document).ready(function(){
+    const p=$('#aiChatPopup'),tb=$('#aiChatToggleButton'),cb=$('#closeAiChatPopup'),cm=$('#aiChatMessages'),ci=$('#aiChatInput'),sb=$('#sendAiChatMessage'),ak="<%-user.key%>",om=$('#openAiChatFromModal');
+    function oC(){p.css('display','flex');tb.hide();ci.focus();} function cC(){p.hide();tb.show();}
+    tb.on('click',oC);cb.on('click',cC);if(om.length)om.on('click',function(e){e.preventDefault();$('.welcome-modal-close').click();oC();});
+    function addMsg(t,y){const m=$('<div>').addClass('message '+y+'-message').text(t);cm.append(m);cm.scrollTop(cm[0].scrollHeight);}
+    function addLoad(){const l=$('<div>').addClass('message ai-message loading-dots').html('<span></span><span></span><span></span>');cm.append(l);cm.scrollTop(cm[0].scrollHeight);return l;}
+    async function sendMsg(){const x=ci.val().trim();if(!x)return;addMsg(x,'user');ci.val('');const l=addLoad();let ar='Sorry, an error occurred.';
+      try{let r=await fetch(`/api/gemini?prompt=${encodeURIComponent(x)}&apikey=${ak}`);
+        if(!r.ok||r.status===500)r=await fetch(`/api/luminai?text=${encodeURIComponent(x)}&apikey=${ak}`);
+        l.remove();if(!r.ok){const e=await r.json();addMsg(`Error: ${e.message||r.statusText}`,'ai');return;}
+        const d=await r.json();if(d.status&&d.result)addMsg(typeof d.result==='object'?(d.result.response||d.result.content||JSON.stringify(d.result)):d.result,'ai');else addMsg(d.message||ar,'ai');
+      }catch(e){l.remove();addMsg(ar,'ai');}
+    }
+    sb.on('click',sendMsg);ci.on('keypress',function(e){if(e.which===13)sendMsg();});
+    $('.user-notification .dropdown-toggle, .user-info-dropdown .dropdown-toggle').dropdown();
+
+    const apiKeyToCheckInput = $('#apiKeyToCheck');
+    const checkLimitBtn = $('#checkLimitBtn');
+    const limitCheckResultDiv = $('#limitCheckResultDisplay');
+
+    checkLimitBtn.on('click', async function() {
+        const keyToCheck = apiKeyToCheckInput.val().trim();
+        if (!keyToCheck) {
+            limitCheckResultDiv.html('<p class="text-danger mb-0">Please enter an API Key to check.</p>');
+            return;
+        }
+        limitCheckResultDiv.html('<p class="mb-0"><i class="fas fa-spinner fa-spin mr-1"></i>Checking limit, please wait...</p>');
+        try {
+            const response = await fetch(`/api/checklimit?keytocheck=${encodeURIComponent(keyToCheck)}&apikey=${ak}`); 
+            let responseData;
+            try {
+                responseData = await response.json();
+            } catch (jsonError) {
+                 limitCheckResultDiv.html(`<p class="text-danger mb-0">Error: Received non-JSON response from server. Status: ${response.status} ${response.statusText}</p>`);
+                return;
+            }
+            if (!response.ok) {
+                const errorMsg = responseData.message || responseData.error || `Error: ${response.status} ${response.statusText}`;
+                limitCheckResultDiv.html(`<p class="text-danger mb-0">${errorMsg}</p>`);
+                return;
+            }
+            if (responseData.status === true && responseData.data) {
+                const userInfo = responseData.data;
+                let usageText;
+                if (userInfo.isPremium || userInfo.isAdm) {
+                    usageText = 'Unlimited requests';
+                } else {
+                    usageText = `${userInfo.usageCount || 0} / ${userInfo.dailyLimit || 'N/A'} requests today`;
+                }
+                let statusBadge;
+                if (userInfo.isPremium) {
+                    statusBadge = '<span class="badge bg-warning text-dark"><i class="fas fa-crown mr-1"></i>Premium</span>';
+                } else if (userInfo.isAdm) {
+                    statusBadge = '<span class="badge bg-danger text-white"><i class="fas fa-user-shield mr-1"></i>Admin</span>';
+                } else {
+                    statusBadge = '<span class="badge bg-info text-dark">Free User</span>';
+                }
+                limitCheckResultDiv.html(`
+                    <p class="mb-1"><strong>Username:</strong> ${userInfo.username || 'N/A'}</p>
+                    <p class="mb-1"><strong>API Usage:</strong> ${usageText}</p>
+                    <p class="mb-0"><strong>Account Status:</strong> ${statusBadge}</p>
+                `);
+            } else {
+                limitCheckResultDiv.html(`<p class="text-danger mb-0">${responseData.message || 'API Key not found or an unknown error occurred.'}</p>`);
+            }
+        } catch (error) {
+            limitCheckResultDiv.html('<p class="text-danger mb-0">A network error occurred while checking the limit. Please try again.</p>');
+        }
+    });
+  });
+</script>
+</body>
+</html>

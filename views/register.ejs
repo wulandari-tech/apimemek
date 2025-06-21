@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - GeForce APIs</title>
+    <meta property="og:title" content="CRIAR CONTA">
+    <meta property="og:description" content="FEITA POR: @clovermods">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://telegra.ph/file/e28fabcd7e856b4bcef0a.jpg">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif; /* Modern font */
+            background: #310404 url(https://i.pinimg.com/originals/f2/bf/43/f2bf432e3a5c7b14a2c97451e7c6c50f.gif) no-repeat center center fixed;
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+            background-size: cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #fff;
+        }
+        .register-container {
+            background-color: rgba(25, 20, 50, 0.9); /* Darker, slightly transparent */
+            padding: 40px;
+            border-radius: 10px; /* Rounded corners */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 450px; /* Slightly wider for 3 fields */
+            text-align: center;
+        }
+        .register-container h1 {
+            color: #FEBB0B; /* Accent color */
+            margin-bottom: 10px;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+         .register-container h1 .subtitle {
+            color: #03BFCB;
+            font-size: 1.5rem;
+            display: block;
+        }
+        .register-container p.intro {
+            font-size: 0.95rem;
+            color: #B3B8CD;
+            margin-bottom: 25px;
+        }
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #03BFCB; /* Icon color */
+        }
+        input[type="text"],
+        input[type="password"],
+        input[type="email"] { /* Applied style to email type as well */
+            width: 100%;
+            padding: 15px 15px 15px 45px; /* Padding for icon */
+            border: 1px solid #2d2747; /* Subtle border */
+            border-radius: 8px; /* Rounded corners */
+            font-size: 16px;
+            background-color: #1F1A36; /* Dark input background */
+            color: #B3B8CD; /* Light text color */
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
+        }
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        input[type="email"]:focus {
+            outline: none;
+            border-color: #03BFCB; /* Accent border on focus */
+            box-shadow: 0 0 0 0.2rem rgba(3, 191, 203, 0.25);
+        }
+        button.register-btn {
+            background-color: #03BFCB; /* Primary button color */
+            border: none;
+            padding: 15px;
+            width: 100%;
+            border-radius: 8px;
+            color: #231E39; /* Dark text on light button */
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        button.register-btn i {
+            margin-right: 8px;
+        }
+        button.register-btn:hover {
+            background-color: #FEBB0B; /* Secondary accent on hover */
+        }
+        .login-link {
+            margin-top: 25px;
+            font-size: 0.9rem;
+        }
+        .login-link a {
+            color: #FEBB0B; /* Accent color for link */
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <h1>GeForce <span class="subtitle">APIs</span></h1>
+        <p class="intro">Create your account to unlock powerful API features. It's quick and easy!</p>
+        <form id="register-form" action="/register" method="post">
+            <div class="input-group">
+                <i class="fas fa-user"></i>
+                <input type="text" placeholder="Enter Username" id="username" name="username" required>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-envelope"></i>
+                <input type="email" placeholder="Enter Your Email" id="email" name="email" required>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" placeholder="Create Your Password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="register-btn"><i class="fas fa-user-plus"></i>Create Account</button>
+        </form>
+        <p class="login-link">Already have an account? <a href="/">Login Here</a></p>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var registerForm = document.getElementById('register-form');
+            if(registerForm) {
+                registerForm.addEventListener("submit", function (event) {
+                    var usernameInput = document.getElementById('username');
+                    if (usernameInput && usernameInput.value.indexOf(' ') !== -1) {
+                        alert('Username cannot contain spaces.');
+                        event.preventDefault();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

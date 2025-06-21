@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI APIs - GeForce</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v6.0.0-beta1/css/all.css" type="text/css" media="all" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="https://ferdiz-afk.github.io/deskapp/vendors/styles/core.css">
+    <link rel="stylesheet" type="text/css" href="https://ferdiz-afk.github.io/deskapp/vendors/styles/style.css">
+     <style>
+        body {
+            background: #28223F url('<%= user && user.wallpaper ? user.wallpaper : "https://i.pinimg.com/originals/f2/bf/43/f2bf432e3a5c7b14a2c97451e7c6c50f.gif" %>') no-repeat center center fixed;
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+            background-size: cover;
+            font-family: 'Inter', sans-serif;
+            color: #B3B8CD;
+        }
+        .main-container { padding-top: 20px; }
+        .page-header h4 { color: #FEBB0B; }
+        .breadcrumb-item a { color: #03BFCB; }
+        .breadcrumb-item.active { color: #8c90a1; }
+        .api-card {
+            background-color: #231E39;
+            border: 1px solid #2d2747;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0px 5px 15px rgba(0,0,0,0.2);
+            transition: transform 0.2s ease-in-out;
+        }
+        .api-card:hover {
+            transform: translateY(-5px);
+        }
+        .api-card h5 { color: #FEBB0B; }
+        .api-card p { font-size: 0.9rem; }
+        .api-card .endpoint {
+            background-color: #1F1A36;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+            color: #03BFCB;
+            word-break: break-all;
+        }
+        .api-card .btn-try {
+            background-color: #03BFCB;
+            border-color: #03BFCB;
+            color: #231E39;
+            font-weight: bold;
+        }
+        .api-card .btn-try:hover {
+            background-color: #FEBB0B;
+            border-color: #FEBB0B;
+        }
+        .api-card .badge-premium {
+            background-color: #FEBB0B;
+            color: #231E39;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="pd-ltr-20 xs-pd-20-10">
+            <div class="min-height-200px">
+                <div class="page-header">
+                    <div class="row">
+                        <div class="col-md-6 col-sm-12">
+                            <div class="title">
+                                <h4><i class="fas fa-brain mr-2"></i>Artificial Intelligence APIs</h4>
+                            </div>
+                            <nav aria-label="breadcrumb" role="navigation">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="/">Home</a></li>
+                                    <li class="breadcrumb-item active" aria-current="page">AI Features</li>
+                                </ol>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- API List Start -->
+                 <div class="row">
+                    <!-- Example AI API Card 1 -->
+                    <div class="col-lg-4 col-md-6 col-sm-12">
+                        <div class="api-card">
+                            <h5><i class="fas fa-comments mr-2"></i>AI Chatbot (GPT-based)</h5>
+                            <p>Engage in conversations with an AI assistant.</p>
+                            <p class="endpoint">/api/ai/chat?prompt=[YOUR_PROMPT]&apikey=[YOUR_APIKEY]</p>
+                            <a href="#" class="btn btn-try btn-sm float-right"><i class="fas fa-external-link-alt mr-1"></i> Try it</a>
+                        </div>
+                    </div>
+
+                    <!-- Example AI API Card 2 -->
+                    <div class="col-lg-4 col-md-6 col-sm-12">
+                        <div class="api-card">
+                            <h5><i class="fas fa-image mr-2"></i>Image Generation (DALL-E like) <span class="badge badge-premium ml-2">Premium</span></h5>
+                            <p>Generate unique images from text descriptions (Premium only).</p>
+                            <p class="endpoint">/api/ai/imagine?text=[DESCRIPTION]&apikey=[YOUR_APIKEY]</p>
+                            <a href="#" class="btn btn-try btn-sm float-right"><i class="fas fa-external-link-alt mr-1"></i> Try it</a>
+                        </div>
+                    </div>
+                    
+                    <!-- Example AI API Card 3 -->
+                    <div class="col-lg-4 col-md-6 col-sm-12">
+                        <div class="api-card">
+                            <h5><i class="fas fa-language mr-2"></i>Text Summarization</h5>
+                            <p>Summarize long texts into concise points.</p>
+                            <p class="endpoint">/api/ai/summarize?text=[YOUR_TEXT]&apikey=[YOUR_APIKEY]</p>
+                            <a href="#" class="btn btn-try btn-sm float-right"><i class="fas fa-external-link-alt mr-1"></i> Try it</a>
+                        </div>
+                    </div>
+                    <!-- Add more API cards here -->
+                </div>
+                <!-- API List End -->
+            </div>
+            <footer class="main-footer" style="background-color: #231E39; color: #B3B8CD; border-top: 1px solid #2d2747; padding: 15px 20px; text-align: center; font-size: 14px; margin-top: 30px;">
+                <p>© 2024 - <%= new Date().getFullYear() + 1 %> <a href="/" style="color: #03BFCB;">GeForce APIs</a>. All rights reserved.</p>
+            </footer>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>

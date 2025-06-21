@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - GeForce APIs</title>
+  <meta property="og:title" content="ENTRAR">
+  <meta property="og:description" content="FEITA POR: @clovermods">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://telegra.ph/file/e28fabcd7e856b4bcef0a.jpg">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif; /* Modern font */
+      background: #310404 url(https://i.pinimg.com/originals/f2/bf/43/f2bf432e3a5c7b14a2c97451e7c6c50f.gif) no-repeat center center fixed;
+      -webkit-background-size: cover;
+      -moz-background-size: cover;
+      -o-background-size: cover;
+      background-size: cover;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      color: #fff;
+    }
+    .login-container {
+      background-color: rgba(25, 20, 50, 0.9); /* Darker, slightly transparent */
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    .login-container h1 {
+      color: #FEBB0B; /* Accent color */
+      margin-bottom: 10px;
+      font-size: 2rem;
+      font-weight: bold;
+    }
+    .login-container h1 .subtitle {
+        color: #03BFCB;
+        font-size: 1.5rem;
+        display: block;
+    }
+    .login-container p.intro {
+        font-size: 0.95rem;
+        color: #B3B8CD;
+        margin-bottom: 25px;
+    }
+    .input-group {
+        position: relative;
+        margin-bottom: 20px;
+    }
+    .input-group i {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #03BFCB; /* Icon color */
+    }
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 15px 15px 15px 45px; /* Padding for icon */
+      border: 1px solid #2d2747; /* Subtle border */
+      border-radius: 8px; /* Rounded corners */
+      font-size: 16px;
+      background-color: #1F1A36; /* Dark input background */
+      color: #B3B8CD; /* Light text color */
+      box-sizing: border-box;
+      transition: border-color 0.3s ease;
+    }
+    input[type="text"]:focus,
+    input[type="password"]:focus {
+      outline: none;
+      border-color: #03BFCB; /* Accent border on focus */
+      box-shadow: 0 0 0 0.2rem rgba(3, 191, 203, 0.25);
+    }
+    button.login-btn {
+      background-color: #03BFCB; /* Primary button color */
+      border: none;
+      padding: 15px;
+      width: 100%;
+      border-radius: 8px;
+      color: #231E39; /* Dark text on light button */
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    button.login-btn i {
+        margin-right: 8px;
+    }
+    button.login-btn:hover {
+      background-color: #FEBB0B; /* Secondary accent on hover */
+    }
+    .register-link {
+      margin-top: 25px;
+      font-size: 0.9rem;
+    }
+    .register-link a {
+      color: #FEBB0B; /* Accent color for link */
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .register-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h1>GeForce <span class="subtitle">APIs</span></h1>
+    <p class="intro">Welcome! Access a world of powerful APIs. Log in to continue or create an account to get started.</p>
+    <form action="/login" method="post">
+      <div class="input-group">
+        <i class="fas fa-user"></i>
+        <input type="text" placeholder="Enter Username" id="username" name="username" required>
+      </div>
+      <div class="input-group">
+        <i class="fas fa-lock"></i>
+        <input type="password" placeholder="Enter Your Password" id="password" name="password" required>
+      </div>
+      <button type="submit" class="login-btn"><i class="fas fa-sign-in-alt"></i>Enter</button>
+    </form>
+    <p class="register-link">Don't Have An Account Yet? <a href="/register">Get Started - Daftar Sekarang!</a></p>
+  </div>
+
+  <script>
+    // Original script for specific logins - kept for compatibility, though modern auth is usually backend-driven
+    function logar() {
+      var login = document.getElementById('username').value;
+      var password = document.getElementById('password').value;
+      // This client-side login logic is generally insecure and should be handled by the server.
+      // Keeping it as it was in the original file.
+      if (login == "Admin" && password == "1234") { location.href = "docs.html"; }
+      if (login == "KevinMaster" && password == "Mj14141414") { location.href = "docs.html"; }
+      if (login == "KazeDevID" && password == "Kaze123") { location.href = "docs.html"; }
+      if (login == "DModZ" && password == "holapapu132") { location.href = "docs.html"; }
+      if (login == "ts3010" && password == "1866") { location.href = "docs.html"; }
+    }
+  </script>
+</body>
+</html>

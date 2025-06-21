@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Editar Perfil</title>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif; /* Modern font */
+      background-color: #28223F; /* Dark background */
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column; /* Align items vertically */
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      color: #B3B8CD; /* Light text color */
+    }
+    h1 {
+      text-align: center;
+      color: #FEBB0B; /* Accent color for heading */
+      margin-bottom: 30px;
+    }
+    form {
+      background-color: #231E39; /* Darker form background */
+      padding: 30px;
+      border-radius: 10px; /* Rounded corners */
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      width: 100%;
+      max-width: 500px;
+      border: 1px solid #2d2747; /* Subtle border */
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500; /* Bolder labels */
+      color: #B3B8CD;
+    }
+    input[type="text"],
+    input[type="password"],
+    input[type="email"],
+    input[type="number"] {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 20px;
+      box-sizing: border-box;
+      border: 1px solid #2d2747;
+      border-radius: 6px;
+      background-color: #1F1A36; /* Dark input background */
+      color: #B3B8CD;
+      font-size: 1rem;
+    }
+    input[type="text"]:focus,
+    input[type="password"]:focus,
+    input[type="email"]:focus,
+    input[type="number"]:focus {
+        outline: none;
+        border-color: #03BFCB;
+        box-shadow: 0 0 0 0.2rem rgba(3, 191, 203, 0.25);
+    }
+    .toggle-switch {
+      display: flex; /* Use flexbox for alignment */
+      align-items: center; /* Vertically center items */
+      margin-bottom: 20px;
+      cursor: pointer;
+    }
+    .toggle-switch input[type="checkbox"] {
+      opacity: 0; /* Hide original checkbox */
+      width: 0;
+      height: 0;
+    }
+    .toggle-switch .slider-label {
+        margin-left: 10px; /* Space between slider and text */
+        font-weight: 500;
+        color: #B3B8CD;
+    }
+    .slider {
+      width: 40px; /* Slider width */
+      height: 20px; /* Slider height */
+      background-color: #2d2747; /* Default slider background */
+      border-radius: 20px; /* Rounded slider */
+      position: relative;
+      transition: background-color 0.3s ease;
+    }
+    .slider::before {
+      content: '';
+      width: 16px; /* Knob width */
+      height: 16px; /* Knob height */
+      background-color: #B3B8CD; /* Knob color */
+      border-radius: 50%;
+      position: absolute;
+      top: 2px; /* Center knob vertically */
+      left: 2px; /* Knob starting position */
+      transition: transform 0.3s ease;
+    }
+    input[type="checkbox"]:checked + .slider {
+      background-color: #03BFCB; /* Active slider background (green) */
+    }
+    input[type="checkbox"]:checked + .slider::before {
+      transform: translateX(20px); /* Move knob to the right */
+    }
+    button[type="submit"], button.delete-btn {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 10px; /* Spacing for multiple buttons */
+      box-sizing: border-box;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    button[type="submit"] {
+      background-color: #03BFCB; /* Primary action color */
+      color: #231E39;
+      border: 1px solid #03BFCB;
+    }
+    button[type="submit"]:hover {
+      background-color: #FEBB0B;
+      border-color: #FEBB0B;
+    }
+    button.delete-btn {
+      background-color: #dc3545; /* Red for delete */
+      color: white;
+      border: 1px solid #dc3545;
+    }
+    button.delete-btn:hover {
+      background-color: #c82333;
+      border-color: #bd2130;
+    }
+    button i {
+        margin-right: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1><i class="fas fa-user-edit"></i> Editar Perfil de Usuário</h1>
+
+  <form action="/edit/<%= user.username %>" method="post">
+    <label for="password"><i class="fas fa-key mr-1"></i> Nova Senha:</label>
+    <input type="password" id="password" value="<%= user.password %>" name="password" placeholder="Deixe em branco para não alterar">
+
+    <label for="email"><i class="fas fa-envelope mr-1"></i> Novo E-mail:</label>
+    <input type="email" id="email" name="email" value="<%= user.email %>">
+
+    <label for="key"><i class="fas fa-cogs mr-1"></i> Nova Chave API:</label>
+    <input type="text" id="key" name="key" value="<%= user.key %>">
+
+    <label for="saldo"><i class="fas fa-wallet mr-1"></i> Novo Saldo:</label>
+    <input type="number" id="saldo" name="saldo" value="<%= user.saldo %>">
+
+    <label for="total"><i class="fas fa-star mr-1"></i> Novo Total (Nível/Pontos):</label>
+    <input type="number" id="total" name="total" value="<%= user.total %>">
+
+    <label for="ft"><i class="fas fa-image mr-1"></i> Nova URL da Foto:</label>
+    <input type="text" id="ft" name="ft" value="<%= user.ft %>">
+
+    <label class="toggle-switch">
+      <input type="checkbox" id="giveAdm" name="isAdm" <% if (user.isAdm) { %>checked<% } %> value="true">
+      <span class="slider"></span>
+      <span class="slider-label"><i class="fas fa-user-shield mr-1"></i> Conceder Status de Administrador</span>
+    </label>
+    
+    <!-- Add isPremium toggle -->
+    <label class="toggle-switch">
+      <input type="checkbox" id="givePremium" name="isPremium" <% if (user.isPremium) { %>checked<% } %> value="true">
+      <span class="slider"></span>
+      <span class="slider-label"><i class="fas fa-crown mr-1"></i> Conceder Status Premium</span>
+    </label>
+
+    <button type="submit"><i class="fas fa-save"></i> Salvar Alterações</button>
+  </form>
+
+  <button type="button" class="delete-btn" onclick="confirmDelete()"><i class="fas fa-trash-alt"></i> Deletar Usuário</button>
+
+  <script>
+    function confirmDelete() {
+      if (confirm('Tem certeza que deseja deletar este usuário? Esta ação é irreversível.')) {
+        window.location.href = '/deletar/<%= user.username %>';
+      }
+    }
+    // No need for the DOMContentLoaded listener for checkbox logging anymore unless for debugging.
+  </script>
+</body>
+</html>
