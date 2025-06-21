@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - ZACX STORE</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-store"></i> ZACX STORE
+            </a>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="checkout-form">
+                    <h2 class="text-center mb-4"><i class="fas fa-credit-card"></i> Detail Pembelian</h2>
+                    
+                    <div id="selectedProductInfo" class="mb-4 p-3 rounded" style="background-color: var(--accent-color);">
+                        </div>
+
+                    <form id="checkoutForm">
+                        <div class="mb-3">
+                            <label for="ffId" class="form-label"><i class="fas fa-user"></i> Free Fire ID</label>
+                            <input type="text" class="form-control" id="ffId" placeholder="Masukkan ID Game Anda" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="ffNickname" class="form-label"><i class="fas fa-signature"></i> Free Fire Nickname (Opsional)</label>
+                            <input type="text" class="form-control" id="ffNickname" placeholder="Masukkan Nickname Anda">
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-buy btn-lg">
+                                <i class="fas fa-qrcode"></i> Lanjut ke Pembayaran QRIS
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="footer">
+        <p>© <script>document.write(new Date().getFullYear())</script> ZACX STORE. Pembayaran Aman.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const selectedProduct = JSON.parse(localStorage.getItem('selectedProduct'));
+            const productInfoDiv = document.getElementById('selectedProductInfo');
+
+            if (!selectedProduct) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Pilih Produk Dulu',
+                    text: 'Anda akan diarahkan kembali ke halaman utama.',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    window.location.href = '/';
+                });
+                return;
+            }
+
+            productInfoDiv.innerHTML = `
+                <h5><i class="fas ${selectedProduct.icon || 'fa-shopping-bag'}"></i> ${selectedProduct.name}</h5>
+                <p class="mb-0">Harga: <strong>${formatRupiah(selectedProduct.price)}</strong></p>
+            `;
+
+            document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const ffId = document.getElementById('ffId').value.trim();
+                const ffNickname = document.getElementById('ffNickname').value.trim();
+
+                if (!ffId) {
+                    Swal.fire('Error', 'Free Fire ID wajib diisi!', 'error');
+                    return;
+                }
+                
+                Swal.fire({
+                    title: 'Memproses Permintaan...',
+                    text: 'Mohon tunggu sebentar, sedang membuat kode QRIS.',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                try {
+                    const payload = { 
+                        amount: selectedProduct.price, 
+                        productName: selectedProduct.name,
+                        ffId: ffId,
+                        ffNickname: ffNickname
+                    };
+                    
+                    const response = await fetch('/api/create-qris', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (!response.ok || !data.success) {
+                        console.error("Checkout.html: Error dari /api/create-qris - Status:", response.status, "Pesan dari server:", data.message);
+                        throw new Error(data.message || `Gagal membuat QRIS. Status server: ${response.status}`);
+                    }
+                    
+                    const paymentDataToStore = {
+                        ...data,
+                        productName: selectedProduct.name,
+                        ffId: ffId,
+                        ffNickname: ffNickname
+                    };
+                    localStorage.setItem('paymentDetails', JSON.stringify(paymentDataToStore));
+                    Swal.close();
+                    window.location.href = '/processing';
+
+                } catch (error) {
+                    console.error('Checkout.html: Error saat proses pembuatan QRIS:', error);
+                    Swal.fire('Error Terjadi', 'Gagal melanjutkan ke pembayaran: ' + error.message, 'error');
+                }
+            });
+        });
+    </script></body>
+</html>

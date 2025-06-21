@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proses Pembayaran - ZACX STORE</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="fas fa-store"></i> ZACX STORE
+            </a>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="processing-info text-center">
+                    <h2 class="mb-3"><i class="fas fa-hourglass-half"></i> Menunggu Pembayaran</h2>
+                    <p>Silakan scan kode QRIS di bawah ini untuk menyelesaikan pembayaran.</p>
+                    
+                    <img src="https://via.placeholder.com/300?text=Memuat+QRIS..." alt="QRIS Code" id="qris-image" class="img-fluid mb-3">
+                    
+                    <p id="paymentAmountInfo" class="fs-5">Jumlah Pembayaran: <strong>Memuat...</strong></p>
+                    <p id="productNameInfo" class_:"fs-6">Produk: <strong>Memuat...</strong></p>
+                    <p id="expiryInfo" class="text-warning"><i class="fas fa-exclamation-triangle"></i> QRIS akan kedaluwarsa dalam: <strong id="countdownTimer">--:--</strong></p>
+
+                    <div id="statusCheckArea" class="mt-4">
+                        <div class="spinner-container mb-2">
+                            <div class="modern-spinner" id="paymentSpinner"></div>
+                        </div>
+                        <p id="statusText" class="fs-5">Mengecek status pembayaran secara otomatis...</p>
+                        <button id="manualCheckBtn" class="btn btn-secondary mt-2">
+                            <i class="fas fa-sync-alt"></i> Cek Status Manual
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>© 2024 ZACX STORE. Proses Cepat dan Aman.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/js/script.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const paymentDetails = JSON.parse(localStorage.getItem('paymentDetails'));
+        
+        if (!paymentDetails || !paymentDetails.orkutReffId) {
+            Swal.fire('Error', 'Detail pembayaran tidak valid atau tidak lengkap. Kembali ke beranda.', 'error')
+                .then(() => window.location.href = '/');
+            return;
+        }
+
+        document.getElementById('qris-image').src = paymentDetails.qrImageUrl;
+        document.getElementById('paymentAmountInfo').innerHTML = `Jumlah: <strong>${formatRupiah(paymentDetails.amountToPayWithFee)}</strong>`;
+        document.getElementById('productNameInfo').innerHTML = `Produk: <strong>${paymentDetails.productName}</strong>`;
+
+        let expiryInterval;
+        let isChecking = false;
+        const manualCheckBtn = document.getElementById('manualCheckBtn');
+        const statusTextEl = document.getElementById('statusText');
+        const paymentSpinnerContainer = document.querySelector('.spinner-container');
+
+        function startExpiryTimer(expiryTimeString) {
+            const expiryTime = new Date(expiryTimeString).getTime();
+            expiryInterval = setInterval(() => {
+                const now = new Date().getTime();
+                const distance = expiryTime - now;
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                document.getElementById('countdownTimer').textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+                if (distance < 0) {
+                    clearInterval(expiryInterval);
+                    document.getElementById('countdownTimer').textContent = "KEDALUWARSA";
+                    document.getElementById('countdownTimer').classList.replace('text-warning', 'text-danger');
+                    statusTextEl.textContent = "QRIS telah kedaluwarsa. Buat transaksi baru.";
+                    paymentSpinnerContainer.style.display = 'none';
+                    manualCheckBtn.disabled = true;
+                    manualCheckBtn.classList.replace('btn-primary', 'btn-secondary');
+                    Swal.fire({ icon: 'error', title: 'QRIS Kedaluwarsa', text: 'Ulangi proses pembelian.', confirmButtonText: 'Ke Toko' })
+                        .then(() => window.location.href = '/');
+                }
+            }, 1000);
+        }
+
+        if (paymentDetails.expiredAt) {
+            startExpiryTimer(paymentDetails.expiredAt);
+        }
+
+        async function checkPaymentStatus() {
+            if (isChecking) return;
+            isChecking = true;
+            manualCheckBtn.disabled = true;
+            manualCheckBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengecek...';
+            paymentSpinnerContainer.style.display = 'flex';
+            statusTextEl.textContent = "Mengecek status pembayaran...";
+
+            try {
+                const url = `/api/check-status/${paymentDetails.orkutReffId}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (!response.ok && response.status !== 404) { // 404 dihandle sebagai "belum bayar/tidak ada"
+                   throw new Error(data.message || `Gagal cek status (HTTP ${response.status})`);
+                }
+
+                if (data.success && data.isPaid) {
+                    clearInterval(expiryInterval);
+                    statusTextEl.textContent = "Pembayaran Berhasil!";
+                    statusTextEl.className = 'fs-5 text-success';
+                    paymentSpinnerContainer.style.display = 'none';
+                    manualCheckBtn.innerHTML = '<i class="fas fa-check-circle"></i> Pembayaran Sukses';
+                    manualCheckBtn.classList.replace('btn-primary', 'btn-success');
+                    manualCheckBtn.disabled = true;
+
+                    Swal.fire({ icon: 'success', title: 'Pembayaran Sukses!', text: 'Akan diarahkan ke WhatsApp.', timer: 3500, timerProgressBar: true, allowOutsideClick: false, didOpen: () => Swal.showLoading() })
+                        .then(() => {
+                            const message = `Halo ZACX STORE, pembayaran pesanan:\nProduk: ${paymentDetails.productName}\nID: ${paymentDetails.ffId}\nNick: ${paymentDetails.ffNickname || '-'}\nRef: ${paymentDetails.orkutReffId}\nMohon diproses.`;
+                            window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+                        });
+                } else {
+                    statusTextEl.textContent = data.message || 'Pembayaran belum dikonfirmasi.';
+                    statusTextEl.className = `fs-5 ${response.status === 404 ? 'text-danger' : 'text-warning'}`;
+                    Swal.fire(response.status === 404 ? 'Transaksi Tidak Ada' : 'Belum Terbayar', data.message || 'Coba lagi setelah membayar.', response.status === 404 ? 'error' : 'warning');
+                }
+            } catch (error) {
+                console.error('Processing.html: Error cek status:', error);
+                statusTextEl.textContent = `Error: ${error.message}.`;
+                statusTextEl.className = 'fs-5 text-danger';
+                Swal.fire('Error', 'Gagal cek status: ' + error.message, 'error');
+            } finally {
+                isChecking = false;
+                if (statusTextEl.textContent !== "Pembayaran Berhasil!") {
+                    manualCheckBtn.disabled = false;
+                    manualCheckBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Cek Status Pembayaran';
+                }
+                if (paymentSpinnerContainer.style.display !== 'none' && statusTextEl.textContent !== "Pembayaran Berhasil!") {
+                     paymentSpinnerContainer.style.display = 'none';
+                }
+            }
+        }
+        manualCheckBtn.addEventListener('click', checkPaymentStatus);
+    });
+</script>
+</body>
+</html>

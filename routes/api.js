@@ -1,121 +1,109 @@
 const express = require('express');
 const router = express.Router();
-const { fetchJson, getBuffer } = require('../lib/functions');
-const { lolkey, creator } = require('../config');
+const { createDynamicOrkutQris, checkOrkutQrisPaymentStatus } = require('../qrisLogic');
+const Transaction = require('../models/transaction');
 
-const loghandler = {
-    noturl: { status: false, creator, code: 400, message: 'Parameter "url" tidak boleh kosong.' },
-    notq: { status: false, creator, code: 400, message: 'Parameter "q" (query) tidak boleh kosong.' },
-    notsurah: { status: false, creator, code: 400, message: 'Parameter "surah" tidak boleh kosong.' },
-    notayat: { status: false, creator, code: 400, message: 'Parameter "ayat" tidak boleh kosong.' },
-    fetchError: (service) => ({ status: false, creator, code: 500, message: `Terjadi kesalahan saat mengambil data dari ${service || 'sumber eksternal'}.` }),
-};
+router.post('/create-qris', async (req, res) => {
+    const { amount, productName, ffId, ffNickname } = req.body;
 
-router.get('/downloader/fbdl', async (req, res) => {
-    const { url } = req.query; if (!url) return res.status(400).json(loghandler.noturl);
+    if (!amount || !productName || !ffId) {
+        console.error("Backend: /api/create-qris - Data tidak lengkap.", req.body);
+        return res.status(400).json({ success: false, message: 'Data input tidak lengkap.' });
+    }
+
     try {
-        const extApiResult = await fetchJson(`https://api.botcahx.biz.id/api/dowloader/fbdown?url=${url}&apikey=Admin`);
-        if (res.locals.incrementApiUsage) await res.locals.incrementApiUsage();
-        res.json({ status: true, creator, result: extApiResult.result });
-    } catch (e) { console.error("FBDL Error:", e.message); res.status(500).json(loghandler.fetchError("Facebook Downloader"));}
+        const qrisResult = await createDynamicOrkutQris(amount, `Pembayaran ${productName}`);
+        console.log("Backend: /api/create-qris - Hasil qrisLogic:", qrisResult.success, qrisResult.orkutReffId);
+
+        if (!qrisResult.success || !qrisResult.orkutReffId) {
+            console.error("Backend: /api/create-qris - Gagal membuat QRIS dari qrisLogic:", qrisResult.message);
+            return res.status(500).json({ success: false, message: qrisResult.message || 'Gagal internal saat membuat data QRIS.' });
+        }
+
+        const newTransaction = new Transaction({
+            orkutReffId: qrisResult.orkutReffId,
+            productName: productName,
+            ffId: ffId,
+            ffNickname: ffNickname,
+            originalAmount: qrisResult.originalAmount,
+            amountToPayWithFee: qrisResult.amountToPayWithFee,
+            feeAmount: qrisResult.feeAmount,
+            qrImageUrl: qrisResult.qrImageUrl,
+            qrString: qrisResult.qrString,
+            expiredAt: qrisResult.expiredAt,
+            status: 'PENDING'
+        });
+
+        try {
+            const savedTransaction = await newTransaction.save();
+            console.log("Backend: /api/create-qris - Transaksi BERHASIL disimpan, ID:", savedTransaction._id, "orkutReffId:", savedTransaction.orkutReffId);
+            res.json(qrisResult);
+        } catch (dbError) {
+            console.error("Backend: /api/create-qris - GAGAL menyimpan transaksi ke DB:", dbError.message, dbError.stack);
+            console.error("Backend: /api/create-qris - Data yang gagal disimpan:", newTransaction.toObject());
+            res.status(500).json({ success: false, message: 'Gagal menyimpan detail transaksi. Silakan coba lagi. Jika masalah berlanjut, hubungi admin. (DBErr)' });
+        }
+
+    } catch (error) {
+        console.error("Backend: /api/create-qris - Error Umum:", error.message, error.stack);
+        res.status(500).json({ success: false, message: 'Terjadi kesalahan server: ' + error.message });
+    }
 });
-router.get('/downloader/tiktok', async (req, res) => {
-    const { url } = req.query; if (!url) return res.status(400).json(loghandler.noturl);
+
+router.get('/check-status/:orkutReffId', async (req, res) => {
+    const { orkutReffId } = req.params;
+    console.log("Backend: /api/check-status - Cek untuk orkutReffId:", orkutReffId);
+
+    if (!orkutReffId) {
+        return res.status(400).json({ success: false, message: 'orkutReffId diperlukan.' });
+    }
     try {
-        const extApiResult = await fetchJson(`https://api.botcahx.biz.id/api/dowloader/tikok?url=${url}&apikey=Admin`);
-        if (res.locals.incrementApiUsage) await res.locals.incrementApiUsage();
-        res.json({ status: true, creator, result: extApiResult.result });
-    } catch (e) { console.error("TikTok DL Error:", e.message); res.status(500).json(loghandler.fetchError("TikTok Downloader"));}
-});
-router.get('/downloader/ytplay', async (req, res) => {
-    const { q } = req.query; if (!q) return res.status(400).json(loghandler.notq);
-    try {
-        const extApiResult = await fetchJson(`https://api.botcahx.biz.id/api/search/ytplay?query=${q}&apikey=Admin`);
-        if (res.locals.incrementApiUsage) await res.locals.incrementApiUsage();
-        res.json({ status: true, creator, result: extApiResult.result });
-    } catch (e) { console.error("YTPlay Error:", e.message); res.status(500).json(loghandler.fetchError("YouTube Play"));}
-});
-router.get('/downloader/ytsearch', async (req, res) => {
-    const { q } = req.query; if (!q) return res.status(400).json(loghandler.notq);
-    try {
-        const extApiResult = await fetchJson(`https://api.botcahx.biz.id/api/search/ytsearch?query=${q}&apikey=Admin`);
-        if (res.locals.incrementApiUsage) await res.locals.incrementApiUsage();
-        res.json({ status: true, creator, result: extApiResult.result });
-    } catch (e) { console.error("YTSearch Error:", e.message); res.status(500).json(loghandler.fetchError("YouTube Search"));}
-});
-router.get('/downloader/ytmp3', async (req, res) => {
-    const { url } = req.query; if (!url) return res.status(400).json(loghandler.noturl);
-    try {
-        const extApiResult = await fetchJson(`https://api.botcahx.biz.id/api/dowloader/ytmp3?url=${url}&apikey=Admin`);
-        if (res.locals.incrementApiUsage) await res.locals.incrementApiUsage();
-        res.json({ status: true, creator, result: extApiResult.result });
-    } catch (e) { console.error("YTMP3 Error:", e.message); res.status(500).json(loghandler.fetchError("YouTube MP3"));}
-});
-router.get('/downloader/ytmp4', async (req, res) => {
-    const { url } = req.query; if (!url) return res.status(400).json(loghandler.noturl);
-    try {
-        const extApiResult = await fetchJson(`https://api.botcahx.biz.id/api/dowloader/ytmp4?url=${url}&apikey=Admin`);
-        if (res.locals.incrementApiUsage) await res.locals.incrementApiUsage();
-        res.json({ status: true, creator, result: extApiResult.result });
-    } catch (e) { console.error("YTMP4 Error:", e.message); res.status(500).json(loghandler.fetchError("YouTube MP4"));}
-});
-router.get('/islamic/jadwalsholat', async (req, res) => {
-    const { q } = req.query; if (!q) return res.status(400).json(loghandler.notq);
-    try {
-        const extApiResult = await fetchJson(`https://api.lolhuman.xyz/api/sholat/${q}?apikey=${lolkey}`);
-        if (res.locals.incrementApiUsage) await res.locals.incrementApiUsage();
-        res.json({ status: true, creator, result: extApiResult.result });
-    } catch (e) { console.error("Jadwal Sholat Error:", e.message); res.status(500).json(loghandler.fetchError("Jadwal Sholat"));}
-});
-router.get('/islamic/kisahnabi', async (req, res) => {
-    const { q } = req.query; if (!q) return res.status(400).json(loghandler.notq);
-    try {
-        const extApiResult = await fetchJson(`https://api.lolhuman.xyz/api/kisahnabi/${q}?apikey=${lolkey}`);
-        if (res.locals.incrementApiUsage) await res.locals.incrementApiUsage();
-        res.json({ status: true, creator, result: extApiResult.result });
-    } catch (e) { console.error("Kisah Nabi Error:", e.message); res.status(500).json(loghandler.fetchError("Kisah Nabi"));}
-});
-router.get('/islamic/niatsholat', async (req, res) => {
-    const { q } = req.query; if (!q) return res.status(400).json(loghandler.notq);
-    try {
-        const extApiResult = await fetchJson(`https://api.lolhuman.xyz/api/niatsholat/${q}?apikey=${lolkey}`);
-        if (res.locals.incrementApiUsage) await res.locals.incrementApiUsage();
-        res.json({ status: true, creator, result: extApiResult.result });
-    } catch (e) { console.error("Niat Sholat Error:", e.message); res.status(500).json(loghandler.fetchError("Niat Sholat"));}
-});
-router.get('/islamic/ayat', async (req, res) => {
-    const { surah, ayat } = req.query; if (!surah)return res.status(400).json(loghandler.notsurah); if(!ayat)return res.status(400).json(loghandler.notayat);
-    try {
-        const extApiResult = await fetchJson(`https://api.lolhuman.xyz/api/quran/${surah}/${ayat}?apikey=${lolkey}`);
-        if (res.locals.incrementApiUsage) await res.locals.incrementApiUsage();
-        res.json({ status: true, creator, result: extApiResult.result });
-    } catch (e) { console.error("Quran Ayat Error:", e.message); res.status(500).json(loghandler.fetchError("Quran Ayat"));}
-});
-router.get('/islamic/surah', async (req, res) => {
-    const { surah } = req.query; if (!surah) return res.status(400).json(loghandler.notsurah);
-    try {
-        const extApiResult = await fetchJson(`https://api.lolhuman.xyz/api/quran/${surah}?apikey=${lolkey}`);
-        if (res.locals.incrementApiUsage) await res.locals.incrementApiUsage();
-        res.json({ status: true, creator, result: extApiResult.result });
-    } catch (e) { console.error("Quran Surah Error:", e.message); res.status(500).json(loghandler.fetchError("Quran Surah"));}
-});
-router.get('/islamic/ayat-audio', async (req, res) => {
-    const { surah, ayat } = req.query; if(!surah)return res.status(400).json(loghandler.notsurah);if(!ayat)return res.status(400).json(loghandler.notayat);
-    try {
-        const audioBuffer = await getBuffer(`https://api.lolhuman.xyz/api/quran/audio/${surah}/${ayat}?apikey=${lolkey}`);
-        if (audioBuffer.error) return res.status(500).json({ status: false, message: audioBuffer.message });
-        if (res.locals.incrementApiUsage) await res.locals.incrementApiUsage();
-        res.set({'Content-Type': 'audio/mp3'}); res.send(audioBuffer);
-    } catch (e) { console.error("Ayat Audio Error:", e.message); if(!res.headersSent)res.status(500).json(loghandler.fetchError("Ayat Audio"));}
-});
-router.get('/islamic/surah-audio', async (req, res) => {
-    const { surah } = req.query; if (!surah) return res.status(400).json(loghandler.notsurah);
-    try {
-        const audioBuffer = await getBuffer(`https://api.lolhuman.xyz/api/quran/audio/${surah}?apikey=${lolkey}`);
-        if (audioBuffer.error) return res.status(500).json({ status: false, message: audioBuffer.message });
-        if (res.locals.incrementApiUsage) await res.locals.incrementApiUsage();
-        res.set({'Content-Type': 'audio/mp3'}); res.send(audioBuffer);
-    } catch (e) { console.error("Surah Audio Error:", e.message); if(!res.headersSent)res.status(500).json(loghandler.fetchError("Surah Audio"));}
+        const transaction = await Transaction.findOne({ orkutReffId: orkutReffId });
+
+        if (!transaction) {
+            console.warn("Backend: /api/check-status - Transaksi TIDAK DITEMUKAN di DB:", orkutReffId);
+            return res.status(404).json({ success: false, isPaid: false, message: 'Transaksi tidak ditemukan. Pastikan Anda telah menyelesaikan langkah pembuatan pesanan sebelumnya.' });
+        }
+        console.log("Backend: /api/check-status - Transaksi DITEMUKAN:", transaction.orkutReffId, "Status DB:", transaction.status);
+
+        if (transaction.status === 'PAID') {
+            return res.json({ success: true, isPaid: true, message: 'Pembayaran sudah dikonfirmasi.' });
+        }
+        
+        if (transaction.status === 'EXPIRED') {
+            return res.json({ success: true, isPaid: false, message: 'Transaksi ini sudah kedaluwarsa.' });
+        }
+
+        if (new Date() > new Date(transaction.expiredAt)) {
+             if (transaction.status !== 'EXPIRED') {
+                 transaction.status = 'EXPIRED';
+                 await transaction.save();
+                 console.log("Backend: /api/check-status - Transaksi diupdate EXPIRED (waktu habis):", orkutReffId);
+             }
+            return res.json({ success: true, isPaid: false, message: 'Waktu pembayaran untuk transaksi ini telah habis.' });
+        }
+
+        const statusResult = await checkOrkutQrisPaymentStatus(orkutReffId, transaction.amountToPayWithFee, transaction.updatedAt);
+        console.log("Backend: /api/check-status - Hasil OkeConnect:", statusResult.success, statusResult.isPaid, statusResult.message);
+        
+        if (statusResult.success && statusResult.isPaid) {
+            transaction.status = 'PAID';
+            transaction.paidAt = new Date();
+            transaction.okeconnectTxDetails = statusResult.transaction;
+            await transaction.save();
+            console.log("Backend: /api/check-status - Transaksi diupdate PAID (dari OkeConnect):", orkutReffId);
+            return res.json({ success: true, isPaid: true, message: 'Pembayaran berhasil dikonfirmasi.' });
+        } else {
+            let message = statusResult.message || 'Pembayaran belum ditemukan atau belum diproses oleh penyedia.';
+            if (!statusResult.success && statusResult.message) { 
+                message = `Gagal cek ke penyedia: ${statusResult.message}`;
+            }
+            return res.json({ success: true, isPaid: false, message: message });
+        }
+    } catch (error) {
+        console.error("Backend: /api/check-status - Error Umum:", error.message, error.stack);
+        res.status(500).json({ success: false, isPaid: false, message: 'Kesalahan server saat memeriksa status: ' + error.message });
+    }
 });
 
 module.exports = router;
